@@ -1,0 +1,27 @@
+body {
+  font: helvetica;
+  background: rgb(35, 35, 35);
+}
+
+  #instructions_panel {
+    background: rgb(76, 76, 76);
+    padding: 10;
+    margin: 2px, 2px;
+    width: 700px;
+  }
+
+  .consoleCommand {
+    color: rgb(223, 223, 223);
+  }
+
+  .commandName {
+    color: rgb(141, 27, 38);
+  }
+
+  .title {
+    color: rgb(246, 235, 200);
+  }
+
+  .descriptorText {
+    color: rgb(242, 201, 113);
+  }
