@@ -5,33 +5,123 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<link rel="stylesheet" href="mr_layout.css">
-	<script type="text/javascript" src="rover.js"></script>
+
 </head>
-<body>
+<body onload="world('spawn rover', 2)">
+	<!-- Loads all rover images -->
+		<!-- Deselected-->
+		<!-- Red Rover -->
+	<img id="redRover-n" src="images/redrovern.png" style="display:none">
+	<img id="redRover-e" src="images/redrovere.png" style="display:none">
+	<img id="redRover-s" src="images/redrovers.png" style="display:none">
+	<img id="redRover-w" src="images/redroverw.png" style="display:none">
 
-	<div id="instructions_Panel">
-				<p>
-		<h3><span class="title">Console Commands:</span> </h3><br />
-					&nbsp; <h4> <span class="consoleCommand">world('command', x)</span><span class="descriptorText"> - Commands that affect the entire environment.</span> </h4><br />
-					<h5>
-					&nbsp; &nbsp; ~ <span class="commandName">'status'</span><span class="descriptorText"> : Reports the current state of the world map.</span> <br />
-					&nbsp; &nbsp; ~ <span class="commandName">'new map'</span><span class="descriptorText"> : Resizes the map by the value of X (e.g. if X is 20, the map will resize to 20x20).</span> <br />
-					&nbsp; &nbsp; ~ <span class="commandName">'spawn obstacle'</span><span class="descriptorText"> : Spawn X amount obstacles in random locations for rovers to find within the current map.<br />
-					&nbsp; &nbsp;	&nbsp;		Running this too many times will likely keep the rovers from being able to go anywhere. They'll basically be buried.</span>  <br />
-					&nbsp; &nbsp; ~ <span class="commandName">'spawn rover'</span><span class="descriptorText"> : Spawns X amount of rovers up to a maximum of 6 on the map.</span>  <br />
-					<p>
-					&nbsp; <h4> <span class="consoleCommand">sendTo('rover name', command)</span><span class="descriptorText"> - Selects a specific rover , if any, and provides it a command or sequence of commands to follow.</span> </h4><br />
-					<h5>
-					&nbsp; &nbsp; ~ <span class="commandName">'Rx'<span class="descriptorText"> : Rotates selected rover to the right x amount of times.</span> <br />
-					&nbsp; &nbsp; ~ <span class="commandName">'Lx'<span class="descriptorText"> : Rotates selected rover to the left x amount of times.</span> <br />
-					&nbsp; &nbsp; ~ <span class="commandName">'Fx'<span class="descriptorText"> : Selected rover attempts to move forward by x amount of spaces.</span> <br />
-					&nbsp; &nbsp; ~ <span class="commandName">'Bx'<span class="descriptorText"> : Selected rover attempts to move backward by x amount of spaces.</span>  <br />
-					<p>
-											<span class="descriptorText">Note: All rovers face North by Default.</span>
-					</h5>
-				<p>
+		<!-- Blue Rover -->
+	<img id="blueRover-n" src="images/bluerovern.png" style="display:none">
+	<img id="blueRover-e" src="images/bluerovere.png" style="display:none">
+	<img id="blueRover-s" src="images/bluerovers.png" style="display:none">
+	<img id="blueRover-w" src="images/blueroverw.png" style="display:none">
 
-			</div>
+		<!-- Green Rover -->
+	<img id="greenRover-n" src="images/greenrovern.png" style="display:none">
+	<img id="greenRover-e" src="images/greenrovere.png" style="display:none">
+	<img id="greenRover-s" src="images/greenrovers.png" style="display:none">
+	<img id="greenRover-w" src="images/greenroverw.png" style="display:none">
 
+		<!-- Yellow Rover -->
+	<img id="yellowRover-n" src="images/yellowrovern.png" style="display:none">
+	<img id="yellowRover-e" src="images/yellowrovere.png" style="display:none">
+	<img id="yellowRover-s" src="images/yellowrovers.png" style="display:none">
+	<img id="yellowRover-w" src="images/yellowroverw.png" style="display:none">
+
+		<!-- Orange Rover -->
+	<img id="orangeRover-n" src="images/orangerovern.png" style="display:none">
+	<img id="orangeRover-e" src="images/orangerovere.png" style="display:none">
+	<img id="orangeRover-s" src="images/orangerovers.png" style="display:none">
+	<img id="orangeRover-w" src="images/orangeroverw.png" style="display:none">
+
+		<!-- Pink Rover -->
+	<img id="pinkRover-n" src="images/pinkrovern.png" style="display:none">
+	<img id="pinkRover-e" src="images/pinkrovere.png" style="display:none">
+	<img id="pinkRover-s" src="images/pinkrovers.png" style="display:none">
+	<img id="pinkRover-w" src="images/pinkroverw.png" style="display:none">
+
+	<!-- Selected-->
+	<!-- Red Rover -->
+	<img id="redRover-n-selected" src="images/redrovern_selected.png" style="display:none">
+	<img id="redRover-e-selected" src="images/redrovere_selected.png" style="display:none">
+	<img id="redRover-s-selected" src="images/redrovers_selected.png" style="display:none">
+	<img id="redRover-w-selected" src="images/redroverw_selected.png" style="display:none">
+
+	<!-- Blue Rover -->
+	<img id="blueRover-n-selected" src="images/bluerovern_selected.png" style="display:none">
+	<img id="blueRover-e-selected" src="images/bluerovere_selected.png" style="display:none">
+	<img id="blueRover-s-selected" src="images/bluerovers_selected.png" style="display:none">
+	<img id="blueRover-w-selected" src="images/blueroverw_selected.png" style="display:none">
+
+	<!-- Green Rover -->
+	<img id="greenRover-n-selected" src="images/greenrovern_selected.png" style="display:none">
+	<img id="greenRover-e-selected" src="images/greenrovere_selected.png" style="display:none">
+	<img id="greenRover-s-selected" src="images/greenrovers_selected.png" style="display:none">
+	<img id="greenRover-w-selected" src="images/greenroverw_selected.png" style="display:none">
+
+	<!-- Yellow Rover -->
+	<img id="yellowRover-n-selected" src="images/yellowrovern_selected.png" style="display:none">
+	<img id="yellowRover-e-selected" src="images/yellowrovere_selected.png" style="display:none">
+	<img id="yellowRover-s-selected" src="images/yellowrovers_selected.png" style="display:none">
+	<img id="yellowRover-w-selected" src="images/yellowroverw_selected.png" style="display:none">
+
+	<!-- Orange Rover -->
+	<img id="orangeRover-n-selected" src="images/orangerovern_selected.png" style="display:none">
+	<img id="orangeRover-e-selected" src="images/orangerovere_selected.png" style="display:none">
+	<img id="orangeRover-s-selected" src="images/orangerovers_selected.png" style="display:none">
+	<img id="orangeRover-w-selected" src="images/orangeroverw_selected.png" style="display:none">
+
+	<!-- Pink Rover -->
+	<img id="pinkRover-n-selected" src="images/pinkrovern_selected.png" style="display:none">
+	<img id="pinkRover-e-selected" src="images/pinkrovere_selected.png" style="display:none">
+	<img id="pinkRover-s-selected" src="images/pinkrovers_selected.png" style="display:none">
+	<img id="pinkRover-w-selected" src="images/pinkroverw_selected.png" style="display:none">
+
+		<!-- Obstacles -->
+	<img id="obstacleToken" src="images/obstacletoken.png" style="display:none">
+
+<div class="panelContainer">
+	<div id="controlsInfo">
+
+		<div class="controlButton">
+		<span class="controlCharacters">W</span><br />
+		<span class="controlDescriptions">forward</span><br />
+		</div>
+		<div class="controlButton">
+		<span class="controlCharacters">A</span><br />
+		<span class="controlDescriptions">turn left</span><br />
+		</div>
+		<div class="controlButton">
+		<span class="controlCharacters">S</span><br />
+		<span class="controlDescriptions">backward</span><br />
+		</div>
+		<div class="controlButton">
+		<span class="controlCharacters">D</span><br />
+		<span class="controlDescriptions">turn right</span><br />
+		</div>
+	</div>
+
+	<div id="mainPanel">
+		<canvas id="animationWindow" width="500" height="500">Your browser does not appear to support Canvas. Try installing chrome?</canvas>
+	</div>
+
+
+	<div id="bottomPanel">
+		<span id="outputText" color="white">OUTPUT</span>
+	</div>
+
+</div>
+
+
+
+
+<script type="text/javascript" src="rover.js"></script>
+<script type="text/javascript" src="canvas.js"></script>
 </body>
 </html>

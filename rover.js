@@ -1,3 +1,4 @@
+
   //Creates entire surface area of Map.
 function map(size) {
   gridX = [];
@@ -12,47 +13,52 @@ function map(size) {
   this.startY = gridY[0];
   this.endX = gridX.length - 1;
   this.endY = gridY.length - 1;
-  console.log("Generating " + (this.endX +1)  + "X" + (this.endY +1) + " Planet Map.");
+  console.log("Generated a " + (this.endX +1)  + " X " + (this.endY +1) + " Planet Map.");
 }
 
 //Initializes a default map with a size of 10x10. Can be changed by world("new map", x) where x is the new map size.
 var planetMap = new map(10);
 
+//Output text value
+function updateOutput(outputValue) {
+document.getElementById("outputText").innerHTML=(outputValue);
+}
+//Input Text field
+function getInput() {
+return UserInput = document.getElementById("inputBox").value;
+}
+/*Optionally generates random obstacle(s) that Rover(s) may encounter and report.
+Written such that the obstacles' locations aren't known so that the rovers cannot be hardcoded to avoid them.*/
+function generateObstacles(count) {
+  numberGenerator = function(max) {
+    floatOut = Math.random() * ((max+1) - 1) + 1;
+    rounded = Math.floor(floatOut);
+    return rounded;
+  }
+    updateOutput("Generated " + count + " obstacles.");
+
+    //Used to prevent overwriting pre-existing values for rovers and other obstacles in the obstacleLocations list.
+    var preExisting = tokenLocations.length;
+
+    for (var n = 0; n < count; n++) {
+      obstacleX = numberGenerator(planetMap.endX);
+      obstacleY = numberGenerator(planetMap.endY);
+      tokenLocations.push(new GenerateToken(obstacleX, obstacleY, "obstacle", -1));
+
+    }
+  }
+  //End of obstacle Generator.
+
   //Holds dynamically generated obstacles/rovers and their x,y values.
-  var obstacleLocations = [];
+  function GenerateToken (x, y, type, id) {
+    this.x = x;
+    this.y = y;
+    this.type = type;
+    this.id = id;
+  }
+
+  var tokenLocations = [];
   var roverCount = 0;
-
-  /*Optionally generates random obstacle(s) that Rover(s) may encounter and report.
-  Written such that the obstacles' locations aren't known so that the rovers cannot be hardcoded to avoid them.*/
-  function generateObstacles(count) {
-    numberGenerator = function(max) {
-      var num ="";
-      floatOut = Math.random() * ((max+1) - 1) + 1;
-      stringOut = floatOut.toString();
-      for (i = 0; i < stringOut.length; i++) {
-        if (stringOut[i] == ".") {
-          break;
-        }
-      temp = parseInt(stringOut[i]);
-      num += temp;
-      return num;
-      }
-    }
-      obstacleCount = count;
-      console.log("Generating " + obstacleCount + " obstacles.");
-
-      //Used to prevent overwriting pre-existing values for rovers and other obstacles in the obstacleLocations list.
-      var preExisting = obstacleLocations.length;
-
-      for (n = 0; n < obstacleCount; n++) {
-        obstacleX = numberGenerator(planetMap.endX);
-        obstacleY = numberGenerator(planetMap.endY);
-        var x = (n + preExisting);
-        obstacleLocations[parseInt(x)] = obstacleX + obstacleY;
-
-      }
-    }
-    //End of obstacle Generator.
 
 
 //Start of Rover Constructor Block
@@ -63,100 +69,230 @@ var planetMap = new map(10);
 
   //Arbitrary 'geolocator' for each rover.
   this.roverID = roverCount;
+  this.direction = direction;
+  this.currentFacing = "N";
+  tokenLocations.push(new GenerateToken(this.posX, this.posY, "rover", this.roverID)); // should only be processed at rover generation.
   this.refreshLocation = function() {
-    obstacleLocations[this.roverID] = this.posX + "" + this.posY;
+    tokenLocations[this.roverID].x = this.posX;
+    tokenLocations[this.roverID].y = this.posY;
+    if (this.direction == "N") {
+      this.currentFacing = "N";
+    }
+    else if (this.direction == "E") {
+      this.currentFacing = "E";
+    }
+    else if (this.direction == "S") {
+      this.currentFacing = "S";
+    }
+    else if (this.direction == "W") {
+      this.currentFacing = "W";
+    }
+    else {
+      console.log("refreshLocation not evaluating direction cases. (This should not normally be seen.)");
+    }
   };
   //end geolocator
 
-  //runs at object generation to add each rover into obstacle list.
+  //runs at object generation to add each rover into tokenLocations list.
   this.refreshLocation();
   roverCount++;
 
-
   this.roverName = roverName;
-  this.direction = direction;
-  this.coastIsClear = function(movementDirection) {
 
-    var obstacles = obstacleLocations.length;
+  /*OLD!!!*/ this.coastIsClear = function(movementDirection) {
+    // ***!!! CHECK BELOW THIS AREA AND FIX TO USE NEW ROVER AND OBSTACLE TOKENS TO SCAN FOR OBSTRUCTIONS RATHER THAN READING FROM A STRING USING PARSEINT. !!!***
 
-      for (z = 0; z < obstacles; z++) {
-        console.log((obstacles - 1) + " potential obstacles detected.");
-      var obstacleCoords = obstacleLocations[z];
-      var currentObstacleX = parseInt(obstacleCoords[0]);
-      var currentObstacleY = parseInt(obstacleCoords[1]);
-      var output = false;
+    var scannedRovers = 0;
+    var scannedObstacles = 0;
 
-      //Uncomment for debugging obstacle and rover detection.
-      //console.log("obstacleLocations: " + obstacleLocations + " current obstacle: " + "X:" + currentObstacleX + "Y:" + currentObstacleY);
+    //Identifies and reports what types of possible obstructions exist on the map.
+    for (var i = 0; i < tokenLocations.length; i++) {
+      var scannedId = tokenLocations[i].type;
+      if (scannedId == "obstacle") {
+        scannedObstacles++;
+      }
+      else {
+        scannedRovers++;
+      }
+    }
+    /*for debugging obstacle and rover scanning.
+     *console.log(scannedObstacles + " potential obstacles and " + (scannedRovers - 1) + " other rovers detected.");
+     */
+
+      for (z = 0; z < tokenLocations.length; z++) {
+        var output = false;
+        var currenScanX = tokenLocations[z].x;
+        var currenScanY = tokenLocations[z].y;
+        var currentType = tokenLocations[z].type;
 
         if (movementDirection == "F") {
-          if ((this.direction == "E" && (currentObstacleY !== this.posY))
-          || ((this.direction == "E" && (currentObstacleY == this.posY)) && (this.posX+1 !== currentObstacleX))) {
-          output = true;
+          if ((this.direction == "E" && (currenScanY !== this.posY))
+          || ((this.direction == "E" && currenScanY == this.posY) && (this.posX+1 !== currenScanX))) {
+            if ((this.direction == "E" && (currenScanY == this.posY)) && ((this.posX == planetMap.endX) && currenScanX == planetMap.startX)) {
+              switch (currentType) {
+                case "obstacle":
+                foundObstacles.push(new GenerateToken(currenScanX, currenScanY));
+                updateOutput(this.roverName + " Reports: 'Obstacle encountered at grid location " + currenScanX + ", " + currenScanY + ". Cannot proceed.'");
+                break;
+
+                case "rover":
+                updateOutput(this.roverName + " Reports: 'Rover encountered at grid location " + currenScanX + ", " + currenScanY + ". Cannot proceed.'");
+                break;
+
+                default:
+                break;
+              }
+              output = false;
+              break;
+            }
+            else{
+              output = true;
+            }
         }
-          else if ((this.direction == "W" && (currentObstacleY !== this.posY))
-              || ((this.direction == "W" && (currentObstacleY == this.posY)) && (this.posX-1 !== currentObstacleX))) {
-          output = true;
+          else if ((this.direction == "W" && (currenScanY !== this.posY))
+              || ((this.direction == "W" && (currenScanY == this.posY)) && (this.posX-1 !== currenScanX))) {
+                if ((this.direction == "W" && (currenScanY == this.posY)) && ((this.posX == planetMap.startX) && currenScanX == planetMap.endX)) {
+                  switch (currentType) {
+                    case "obstacle":
+                    foundObstacles.push(new GenerateToken(currenScanX, currenScanY));
+                    updateOutput(this.roverName + " Reports: 'Obstacle encountered at grid location " + currenScanX + ", " + currenScanY + ". Cannot proceed.'");
+                    break;
+
+                    case "rover":
+                    updateOutput(this.roverName + " Reports: 'Rover encountered at grid location " + currenScanX + ", " + currenScanY + ". Cannot proceed.'");
+                    break;
+
+                    default:
+                    break;
+                  }
+                  output = false;
+                  break;
+                }
+                else{
+                  output = true;
+                }
         }
-          else if ((this.direction == "N" && (currentObstacleX !== this.posX))
-              || ((this.direction == "N" && (currentObstacleX == this.posX)) && (this.posY-1 !== currentObstacleY))) {
-          output = true;
+          else if ((this.direction == "N" && (currenScanX !== this.posX))
+              || ((this.direction == "N" && (currenScanX == this.posX)) && (this.posY-1 !== currenScanY))) {
+                if ((this.direction == "N" && (currenScanX == this.posX)) && ((this.posY == planetMap.startY) && currenScanY == planetMap.endY)) {
+                  switch (currentType) {
+                    case "obstacle":
+                    foundObstacles.push(new GenerateToken(currenScanX, currenScanY));
+                    updateOutput(this.roverName + " Reports: 'Obstacle encountered at grid location " + currenScanX + ", " + currenScanY + ". Cannot proceed.'");
+                    break;
+
+                    case "rover":
+                    updateOutput(this.roverName + " Reports: 'Rover encountered at grid location " + currenScanX + ", " + currenScanY + ". Cannot proceed.'");
+                    break;
+
+                    default:
+                    break;
+                  }
+                  output = false;
+                  break;
+                }
+                else{
+                  output = true;
+                }
         }
-          else if ((this.direction == "S" && (currentObstacleX !== this.posX))
-              || ((this.direction == "S" && (currentObstacleX == this.posX)) && (this.posY+1 !== currentObstacleY))) {
-          output = true;
+          else if ((this.direction == "S" && (currenScanX !== this.posX))
+              || ((this.direction == "S" && (currenScanX == this.posX)) && (this.posY+1 !== currenScanY))) {
+                if ((this.direction == "S" && (currenScanX == this.posX)) && ((this.posY == planetMap.endY) && currenScanY == planetMap.startY)) {
+                  switch (currentType) {
+                    case "obstacle":
+                    foundObstacles.push(new GenerateToken(currenScanX, currenScanY));
+                    updateOutput(this.roverName + " Reports: 'Obstacle encountered at grid location " + currenScanX + ", " + currenScanY + ". Cannot proceed.'");
+                    break;
+
+                    case "rover":
+                    updateOutput(this.roverName + " Reports: 'Rover encountered at grid location " + currenScanX + ", " + currenScanY + ". Cannot proceed.'");
+                    break;
+
+                    default:
+                    break;
+                  }
+                  output = false;
+                  break;
+                }
+                else{
+                  output = true;
+                }
         }
         else {
-          console.log(this.roverName + " Reports: 'Obstacle or Rover encountered at grid location " + currentObstacleX + ", " + currentObstacleY + ". Cannot proceed.'");
+          switch (currentType) {
+            case "obstacle":
+            foundObstacles.push(new GenerateToken(currenScanX, currenScanY));
+            updateOutput(this.roverName + " Reports: 'Obstacle encountered at grid location " + currenScanX + ", " + currenScanY + ". Cannot proceed.'");
+            break;
+
+            case "rover":
+            updateOutput(this.roverName + " Reports: 'Rover encountered at grid location " + currenScanX + ", " + currenScanY + ". Cannot proceed.'");
+            break;
+
+            default:
+            break;
+          }
+          output = false;//
           break;
         }
       }
-        else if (movementDirection == "B") {
-          if ((this.direction == "E" && (currentObstacleY !== this.posY))
-          || ((this.direction == "E" && (currentObstacleY == this.posY)) && (this.posX-1 !== currentObstacleX))) {
-        output = true;
-        }
-          else if ((this.direction == "W" && (currentObstacleY !== this.posY))
-              || ((this.direction == "W" && (currentObstacleY == this.posY)) && (this.posX+1 !== currentObstacleX))) {
-        console.log("Coast is clear... moving due East.");
-        output = true;
-        }
-          else if ((this.direction == "N" && (currentObstacleX !== this.posX))
-              || ((this.direction == "N" && (currentObstacleX == this.posX)) && (this.posY+1 !== currentObstacleY))) {
-        output = true;
-        }
-          else if ((this.direction == "S" && (currentObstacleX !== this.posX))
-              || ((this.direction == "S" && (currentObstacleX == this.posX)) && (this.posY-1 !== currentObstacleY))) {
-        output = true;
-        }
-        else {
-          console.log(this.roverName + " Reports: 'Obstacle or Rover encountered at grid location X:" + currentObstacleX + ", " + "Y:" + currentObstacleY + ". Cannot proceed.'");
+      else if (movementDirection == "B") {
+        if ((this.direction == "E" && (currenScanY !== this.posY))
+        || ((this.direction == "E" && (currenScanY == this.posY)) && (this.posX-1 !== currenScanX))) {
+      output = true;
+      }
+        else if ((this.direction == "W" && (currenScanY !== this.posY))
+            || ((this.direction == "W" && (currenScanY == this.posY)) && (this.posX+1 !== currenScanX))) {
+      updateOutput(this.roverName + " Reports: Coast is clear... moving due East.");
+      output = true;
+      }
+        else if ((this.direction == "N" && (currenScanX !== this.posX))
+            || ((this.direction == "N" && (currenScanX == this.posX)) && (this.posY+1 !== currenScanY))) {
+      output = true;
+      }
+        else if ((this.direction == "S" && (currenScanX !== this.posX))
+            || ((this.direction == "S" && (currenScanX == this.posX)) && (this.posY-1 !== currenScanY))) {
+      output = true;
+      }
+      else {
+        switch (currentType) {
+          case "obstacle":
+          foundObstacles.push(new GenerateToken(currenScanX, currenScanY));
+          updateOutput(this.roverName + " Reports: 'Obstacle encountered at grid location " + currenScanX + ", " + currenScanY + ". Cannot proceed.'");
+          break;
+
+          case "rover":
+          updateOutput(this.roverName + " Reports: 'Rover encountered at grid location " + currenScanX + ", " + currenScanY + ". Cannot proceed.'");
+          break;
+
+          default:
           break;
         }
+        break;
       }
+    }
 
         else {
           console.log("Invalid movement direction.");
           output = false;
         }
-
       }
       return output;
     };
 
   this.queryStatus = function() {
       var statusOutput = ("Name: " + this.roverName + " | " + "Direction: " + this.direction + " | " + "Position: " + this.posX + ", " + this.posY);
-      console.log(statusOutput);
+      updateOutput(statusOutput);
   };
 
   this.turn = function(turn, tick) {
     for (i = 0; i < tick; i++) {
     if (turn == "R") {
-      console.log(this.roverName + " is Turning right.");
+      updateOutput(this.roverName + " is Turning right.");
       orientation +=1;
     }
     else if (turn == "L") {
-      console.log(this.roverName + " is Turning left.");
+      updateOutput(this.roverName + " is Turning left.");
       orientation -=1;
     }
     else {
@@ -185,6 +321,7 @@ var planetMap = new map(10);
       this.direction = "W";
       break;
   }
+  this.refreshLocation();
   this.queryStatus();
   };
 
@@ -196,7 +333,7 @@ var planetMap = new map(10);
     || (this.posY !== planetMap.endY && command == "F") && (this.direction == "S" && this.coastIsClear("F"))) {
 
       this.posY += 1;
-      console.log("Coast is clear... moving due South.");
+      updateOutput(this.roverName + "Reports: Coast is clear... moving due South.");
       this.refreshLocation();
       this.queryStatus();
     }
@@ -205,7 +342,7 @@ var planetMap = new map(10);
         || ((this.posY >= planetMap.endY && command == "F") && (this.direction == "S" && this.coastIsClear("F")))) {
 
       this.posY = planetMap.startY;
-      console.log("Coast is clear... moving due South.");
+      updateOutput(this.roverName + "Reports: Coast is clear... moving due South.");
       this.refreshLocation();
       this.queryStatus();
     }
@@ -214,7 +351,7 @@ var planetMap = new map(10);
         || (this.posY !== planetMap.startY && command == "B") && (this.direction == "S" && this.coastIsClear("B"))) {
 
       this.posY -= 1;
-      console.log("Coast is clear... moving due North.");
+      updateOutput(this.roverName + "Reports: Coast is clear... moving due North.");
       this.refreshLocation();
       this.queryStatus();
     }
@@ -223,7 +360,7 @@ var planetMap = new map(10);
         || ((this.posY <= planetMap.startY && command == "B") && (this.direction == "S" && this.coastIsClear("B")))) {
 
       this.posY = planetMap.endY;
-      console.log("Coast is clear... moving due North.");
+      updateOutput(this.roverName + " Reports: Coast is clear... moving due North.");
       this.refreshLocation();
       this.queryStatus();
     }
@@ -232,7 +369,7 @@ var planetMap = new map(10);
           || (this.posX !== planetMap.endX && command == "F") && (this.direction == "E" && this.coastIsClear("F"))) {
 
       this.posX += 1;
-      console.log("Coast is clear... moving due East.");
+      updateOutput(this.roverName + " Reports: Coast is clear... moving due East.");
       this.refreshLocation();
       this.queryStatus();
     }
@@ -241,7 +378,7 @@ var planetMap = new map(10);
         || ((this.posX >= planetMap.endX && command == "F") && (this.direction == "E" && this.coastIsClear("F")))) {
 
       this.posX = planetMap.startX;
-      console.log("Coast is clear... moving due East.");
+      updateOutput(this.roverName + " Reports: Coast is clear... moving due East.");
       this.refreshLocation();
       this.queryStatus();
     }
@@ -250,7 +387,7 @@ var planetMap = new map(10);
           || (this.posX !== planetMap.startX && command == "B") && (this.direction == "E" && this.coastIsClear("B"))) {
 
       this.posX -= 1;
-      console.log("Coast is clear... moving due West.");
+      updateOutput(this.roverName + " Reports: Coast is clear... moving due West.");
       this.refreshLocation();
       this.queryStatus();
     }
@@ -259,7 +396,7 @@ var planetMap = new map(10);
         || ((this.posX <= planetMap.startX && command == "B") && (this.direction == "E" && this.coastIsClear("B")))) {
 
       this.posX = planetMap.endX;
-      console.log("Coast is clear... moving due West.");
+      updateOutput(this.roverName + " Reports: Coast is clear... moving due West.");
       this.refreshLocation();
       this.queryStatus();
     }
@@ -326,6 +463,36 @@ var planetMap = new map(10);
     else {
     console.log("Error: Improper command sequence formatting. Commands (R', 'L', 'F', or 'B') should be followed by a number of times to run each command.");
     }
+  }
+  this.draw = function() {
+    if (this.currentFacing == "N" && (targetID !== this.roverID)) {
+    pen.drawImage(roverSpriteArray[this.roverID][0], (this.posX * scaleFactorX), (this.posY * scaleFactorY), scaleFactorX, scaleFactorY);
+    }
+    else if (this.currentFacing == "E" && (targetID !== this.roverID)) {
+    pen.drawImage(roverSpriteArray[this.roverID][1], (this.posX * scaleFactorX), (this.posY * scaleFactorY), scaleFactorX, scaleFactorY);
+    }
+    else if (this.currentFacing == "S" && (targetID !== this.roverID)) {
+    pen.drawImage(roverSpriteArray[this.roverID][2], (this.posX * scaleFactorX), (this.posY * scaleFactorY), scaleFactorX, scaleFactorY);
+    }
+    else if (this.currentFacing == "W" && (targetID !== this.roverID)) {
+    pen.drawImage(roverSpriteArray[this.roverID][3], (this.posX * scaleFactorX), (this.posY * scaleFactorY), scaleFactorX, scaleFactorY);
+    }
+    else if (this.currentFacing == "N" && (targetID == this.roverID)) {
+    pen.drawImage(roverSpriteArray[this.roverID][4], (this.posX * scaleFactorX), (this.posY * scaleFactorY), scaleFactorX, scaleFactorY);
+    }
+    else if (this.currentFacing == "E" && (targetID == this.roverID)) {
+    pen.drawImage(roverSpriteArray[this.roverID][5], (this.posX * scaleFactorX), (this.posY * scaleFactorY), scaleFactorX, scaleFactorY);
+    }
+    else if (this.currentFacing == "S" && (targetID == this.roverID)) {
+    pen.drawImage(roverSpriteArray[this.roverID][6], (this.posX * scaleFactorX), (this.posY * scaleFactorY), scaleFactorX, scaleFactorY);
+    }
+    else if (this.currentFacing == "W" && (targetID == this.roverID)) {
+    pen.drawImage(roverSpriteArray[this.roverID][7], (this.posX * scaleFactorX), (this.posY * scaleFactorY), scaleFactorX, scaleFactorY);
+    }
+    else {
+      console.log("Sprite image read error.");
+    }
+    this.refreshLocation();
   }
 };
 //end of Rover Constructor Block
@@ -396,7 +563,7 @@ function world(command, count) {
       }
     }
     else if (command == "new map") {
-      planetMap = new map(count);
+      planetMap = new map(getInput());
     }
     else {
       console.log("Invalid command entered. Type 'help()' for list of valid commands.");
@@ -488,5 +655,5 @@ function help() {
   console.log("e.g. - sendTo('red rover', 'R1F3'): Would tell Red Rover to turn right once and move forward 3 spaces.");
   console.log(" \n");
   console.log("help():\n");
-  console.log("What you're reading. Git gud. JK.");
+  console.log("What you're reading.");
 }
